@@ -1,0 +1,13 @@
+#CLASS 0
+
+#VAR Distance {} {} VAR
+#VAR ClosestBank {} {} VAR
+#VAR ClosestBankDistance {} {} VAR
+#VAR ClosestHealer {} {} VAR
+#VAR ClosestHealerDistance {} {} VAR
+#VAR ClosestShop {} {} VAR
+#VAR ClosestShopDistance {} {} VAR
+#VAR Closest_Sign {} {} VAR
+#VAR Closest_Sign_Distance {} {} VAR
+
+#CLASS 0

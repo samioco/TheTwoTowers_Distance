@@ -1,4 +1,4 @@
-#CLASS 0
+//RESET_DistanceVariables#CLASS 0#AL RESET_DistanceVariables {#CLASS 0
 
 #VAR Distance {} {} VAR
 #VAR ClosestBank {} {} VAR
@@ -10,4 +10,4 @@
 #VAR Closest_Sign {} {} VAR
 #VAR Closest_Sign_Distance {} {} VAR
 
-#CLASS 0
+#CLASS 0} _Distance#CLASS 0

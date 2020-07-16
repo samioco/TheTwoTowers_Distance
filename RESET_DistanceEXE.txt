@@ -1,4 +1,4 @@
-#CLASS 0
+//RESET_DistanceEXE#CLASS 0#AL RESET_DistanceEXE {#CLASS 0
 $CLASS = "Tools|Distance|EXE"
 
 #AL DistanceTo {
@@ -108,7 +108,7 @@ MyProfileVars;$shops="";$dist=0
 } ((@MyFaction="ER") AND (@MyTrueLevel<5)) {$shops=@ROOMS_Shops_FH_ID
 } (@MyFaction="ER") {$shops=@ROOMS_Shops_ER
 } (@MyFaction="servant") {$shops=@ROOMS_Shops_Arda_ER
-}
+} 
 
 #SW (!%ismember(%zonenum,"760|759")) {#DELI $shops tarshop
 } (!%ismember(%zonenum,"134|17")) {#DELI $shops outshop}
@@ -140,7 +140,7 @@ $signs=@ROOMS_Signposts_ID
 $closestSP=%item($signs,1)
 #ECHO Signposts: $signs
 DistanceTo $closestSP
-$closestSPDistance=@Distance
+$closestSPDistance=@Distance  
 #FORALL $signs {
   DistanceTo %i
   #IF (@Distance<$closestSPDistance) {
@@ -172,3 +172,4 @@ $ClosestShop=%lower(@ClosestShop)
 } {SellAll}
 } $CLASS
 #CLASS 0
+} _Distance#CLASS 0

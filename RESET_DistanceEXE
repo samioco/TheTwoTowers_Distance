@@ -1,0 +1,174 @@
+#CLASS 0
+$CLASS = "Tools|Distance|EXE"
+
+#AL DistanceTo {
+$dest=%1;$dist=0;$num=0;$dirs="n|w|s|e|h|j|k|l|u|d"
+$path=%pathfrom(,$dest);$path=%subchar($path,".;","")
+#WHILE (%len($path)>0) {
+#IF (%left($path,1)="(") {#ADD $dist 1;$path=%copy($path,%pos(")",$path)+1)}
+  #LOOP 1,%len($path) {
+    #IF (!%isnumber(%copy($path,%i,1))) {
+      $num=%number(%copy($path,1,%i-1))
+      #IF ($num) {#ADD $dist $num} {#ADD $dist 1}
+      $path=%copy($path,%i+1)
+      #BREAK
+    }
+  }
+}
+#VAR Distance {%number($dist)} {} VAR
+#IF (%2="-v") {#ECHO Distance to $dest: @Distance}
+} $CLASS
+
+
+#AL FindBank {
+MyProfileVars;$dist=0;$banks=""
+#SW (((@MyFaction="FR") AND (@MyTrueLevel<5)) OR ((@MyCoordination<=70) AND (%ismember(%zonenum,"22|32|102")))) {$banks=@ROOMS_Banks_WestArda_ID
+} (@MyFaction="FR") {$banks=@ROOMS_Banks_FR
+} ((@MyFaction="ER") AND (@MyTrueLevel<5)) {$banks=@ROOMS_Banks_FH_ID
+} (@MyFaction="ER") {$banks=@ROOMS_Banks_ER
+} (@MyFaction="servant") {$banks=@ROOMS_Banks_Arda_ER}
+#IF ((!%pos("Tarzhayan",%zonename())) && (!%pos("Far Harad",%zonename()))) {#DELI $banks "TarB"}
+#IF ((!%pos(%lower("Minas Tirith"),%lower(%zonename()))) && (!%ismember(%lower(@MyPublicAlign),%lower("Angelic|Hand of Eru")))) {#DELI $banks MTB}
+$ClosestBank=%item($banks,1)
+#ECHO $banks
+DistanceTo $ClosestBank
+$ClosestBank_dist=@Distance
+#FORALL $banks {
+  DistanceTo %i
+  #IF (@Distance<$ClosestBank_dist) {
+    $ClosestBank=%i
+    $ClosestBank_dist=@Distance
+  }
+}
+#VAR ClosestBank {$ClosestBank} {} VAR
+#VAR ClosestBankDistance {$ClosestBank_dist} {} VAR
+SysMsg Closest bank: @ClosestBank: @ClosestBankDistance rooms away
+} $CLASS
+
+#AL GoNearestBank {
+FindBank
+#WALK @ClosestBank
+open account
+} $CLASS
+
+#AL GNB {
+GoNearestBank
+} $CLASS
+
+#AL FindHealer {
+$dist=0
+$healers=""
+#IF (!@HealerList) {HealMeInit}
+$searchList=%lower(@HealerList)
+$searchList=%replace($searchList,%lower("Thranh"),%Lower("ThranIn"))
+$searchList=%replace($searchList,%lower("KhamH"),%lower("KhamCamp"))
+$searchList=%replace($searchList,%lower("DHH"),%lower("DhSP"))
+$searchList=%replace($searchList,%lower("TavH"),%lower("TavSP"))
+$closest=%item($searchList,1)
+DistanceTo $closest
+$closestDist=@Distance
+#FORALL $searchList {
+  DistanceTo %i
+  #IF (@Distance<$closestDist) {
+    $closest=%lower(%i)
+    $closestDist=@Distance
+  }
+}
+#SW ($closest=%lower("ThranIn")) {$closest="ThranH"
+} ($closest=%lower("KhamCamp")) {$closest="KhamH"
+} ($closest=%lower("DhSP")) {$closest="DHH"
+} ($closest=%lower("TavSP")) {$closest="TavH"}
+
+#VAR Healer {$closest} {} VAR
+#VAR ClosestHealer {$closest} {} VAR
+#VAR ClosestHealerDistance {$closestDist} {} VAR
+SysMsg Closest healer: @ClosestHealer: @ClosestHealerDistance rooms away, HealerList: @HealerList, Healer: @Healer
+} $CLASS
+
+#AL GoNearestHealer {
+FindHealer
+$Healer=%lower(@ClosestHealer)
+#SW ($Healer=%lower("KhamH")) {#WALK KhamCamp
+} ($Healer=%lower("DHH")) {#WALK DhSP
+} ($Healer=%lower("ThranH")) {#WALK ThranCrossroads
+} ($Healer=%lower("TavH")) {#WALK TavSP
+} {#WALK @ClosestHealer}
+#VAR LastHealer {@ClosestHealer} {} VAR
+#VAR Healer {@ClosestHealer} {} VAR
+} $CLASS
+
+#AL GNH {
+GoNearestHealer
+} $CLASS
+
+#AL FindShop {
+MyProfileVars;$shops="";$dist=0
+#SW ((@MyFaction=FR) AND (@MyTrueLevel<5)) {$shops=@ROOMS_Shops_WestArda_ID
+} (@MyFaction="FR") {$shops=@ROOMS_Shops_FR
+} ((@MyFaction="ER") AND (@MyTrueLevel<5)) {$shops=@ROOMS_Shops_FH_ID
+} (@MyFaction="ER") {$shops=@ROOMS_Shops_ER
+} (@MyFaction="servant") {$shops=@ROOMS_Shops_Arda_ER
+}
+
+#SW (!%ismember(%zonenum,"760|759")) {#DELI $shops tarshop
+} (!%ismember(%zonenum,"134|17")) {#DELI $shops outshop}
+
+#ECHO Shop List: $shops
+$ClosestShop=%item($shops,1)
+DistanceTo $ClosestShop
+$ClosestShop_dist=@Distance
+#FORALL $shops {
+  DistanceTo %i
+  #IF (@Distance<$ClosestShop_dist) {$ClosestShop=%i;$ClosestShop_dist=@Distance}
+}
+#VAR ClosestShop {$ClosestShop} {} VAR
+#VAR ClosestShopDist {$ClosestShop_dist} {} VAR
+SysMsg Closest Shop: @ClosestShop: @ClosestShopDist rooms away
+} $CLASS
+
+
+#AL GoNearestShop {FindShop;#WALK @ClosestShop} $CLASS
+#AL GNS {
+GoNearestShop
+} $CLASS
+
+#AL FindSignpost {
+MyProfileVars;$dist=0
+$faction=@MyFaction
+$level=@MyTrueLevel
+$signs=@ROOMS_Signposts_ID
+$closestSP=%item($signs,1)
+#ECHO Signposts: $signs
+DistanceTo $closestSP
+$closestSPDistance=@Distance
+#FORALL $signs {
+  DistanceTo %i
+  #IF (@Distance<$closestSPDistance) {
+    $closestSP=%i
+    $closestSPDistance=@Distance
+  }
+}
+#VAR ClosestSignpost {$closestSP} {} VAR
+#VAR ClosestSignDistance {$closestSPDistance} {} VAR
+SysMsg Closest Signpost: @ClosestSignpost: @ClosestSignDistance rooms away
+} $CLASS
+
+#AL FindSP {FindSignpost} $CLASS
+
+#AL GoNearestPost {FindSignpost;#WALK @ClosestSignpost} $CLASS
+
+#AL GNP {
+GoNearestPost
+} $CLASS
+
+#AL GNS_SELL {
+GNS
+$ClosestShop=%lower(@ClosestShop)
+#SW (%ismember($ClosestShop,%lower("PelSmith|PelArm"))) {PelSell
+} ($ClosestShop=%lower("EdoShop")) {EdoSell
+} ($ClosestShop=%lower("Thranshop")) {Thransell
+} ($ClosestShop=%lower("DGShop")) {DGSell
+} ($ClosestShop=%lower("KadShop")) {KadSell
+} {SellAll}
+} $CLASS
+#CLASS 0
